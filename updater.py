@@ -2,7 +2,7 @@ import requests
 import subprocess
 import json
 
-REPO_URL = "https://api.github.com/repos/yourusername/snake_game"
+REPO_URL = "https://api.github.com/repos/LlamaCodeStudios/updates-test"
 BRANCH = "main"
 
 def get_latest_commit():
