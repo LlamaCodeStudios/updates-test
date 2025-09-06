@@ -1,3 +1,4 @@
+from time import sleep
 import requests
 import subprocess
 import json
@@ -58,3 +59,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+sleep(5.0)
