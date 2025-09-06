@@ -5,10 +5,20 @@ import json
 REPO_URL = "https://api.github.com/repos/LlamaCodeStudios/updates-test"
 BRANCH = "main"
 
-def get_latest_commit():
-    url = f"{REPO_URL}/commits/{BRANCH}"
-    response = requests.get(url)
-    return response.json()["sha"]
+def get_latest_version():
+    url = f"{REPO_URL}/tags"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        tags = response.json()
+        if tags:
+            return tags[0]["name"]  # Assumes latest tag is first
+        else:
+            return None
+    except requests.RequestException as e:
+        print(f"⚠️ Failed to fetch tags: {e}")
+        return None
+
 
 def load_local_version():
     try:
@@ -25,30 +35,25 @@ def update_repo():
     subprocess.run(["git", "pull"])
 
 def main():
-    latest = get_latest_commit()
+    latest = get_latest_version()
     local = load_local_version()
 
     if not latest:
-        print("⚠️ Unable to check for updates. Proceeding with local version.")
+        print("⚠️ Could not retrieve latest version.")
         return
 
     if latest != local:
-        print("\n" + "="*50)
-        print("🚨 WARNING: Your version is outdated!")
-        print(f"🔄 Latest version: {latest}")
-        print(f"📦 Local version: {local}")
-        print("💡 It's recommended to update before launching.")
-        print("="*50 + "\n")
-
-        choice = input("Do you want to update now? (y/n): ").strip().lower()
+        print(f"\n🚨 New version available: {latest} (current: {local})")
+        choice = input("Update now? (y/n): ").strip().lower()
         if choice == 'y':
             update_repo()
             save_local_version(latest)
-            print("✅ Update complete.")
+            print("✅ Updated successfully.")
         else:
-            print("⚠️ Skipping update. You may encounter issues.")
+            print("⚠️ Running outdated version.")
     else:
-        print("✅ Game is up to date.")
+        print("✅ You're running the latest version.")
+
 
 
 if __name__ == "__main__":
