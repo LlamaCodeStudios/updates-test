@@ -12,14 +12,10 @@ def get_latest_version():
         response = requests.get(url)
         response.raise_for_status()
         tags = response.json()
-        if tags:
-            return tags[0]["name"]  # Assumes latest tag is first
-        else:
-            return None
-    except requests.RequestException as e:
-        print(f"⚠️ Failed to fetch tags: {e}")
+        return tags[0]["name"] if tags else None
+    except Exception as e:
+        print(f"Error fetching version: {e}")
         return None
-
 
 def load_local_version():
     try:
@@ -33,31 +29,25 @@ def save_local_version(version):
         json.dump({"version": version}, f)
 
 def update_repo():
-    subprocess.run(["git", "pull"])
+    subprocess.run(["git", "pull"], check=True)
 
 def main():
     latest = get_latest_version()
     local = load_local_version()
 
-    if not latest:
-        print("⚠️ Could not retrieve latest version.")
-        return
-
-    if latest != local:
-        print(f"\n🚨 New version available: {latest} (current: {local})")
-        choice = input("Update now? (y/n): ").strip().lower()
+    if latest and latest != local:
+        print(f"🔄 New version available: {latest} (current: {local})")
+        choice = input("Do you want to update now? (y/n): ").strip().lower()
         if choice == 'y':
             update_repo()
             save_local_version(latest)
-            print("✅ Updated successfully.")
+            print("✅ Update complete.")
         else:
-            print("⚠️ Running outdated version.")
+            print("⚠️ Skipping update. You may be running an outdated version.")
     else:
         print("✅ You're running the latest version.")
-
-
 
 if __name__ == "__main__":
     main()
 
-sleep(5.0)
+sleep(3.0)

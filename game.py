@@ -3,30 +3,55 @@ import sys
 import random
 import tkinter as tk
 from tkinter import messagebox
+import subprocess
+
+# 🔄 Run updater.py before game starts
+subprocess.run(["python", "updater.py"])
 
 # Initialize tkinter and pygame
 root = tk.Tk()
 root.withdraw()
 pygame.init()
 
-# Game settings
 WIDTH, HEIGHT = 600, 400
 CELL_SIZE = 20
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Snake Game")
 clock = pygame.time.Clock()
 
-# Initial state
+# 🖼️ Load sprites
+bg_img = pygame.image.load("assets/bg.png").convert()
+snake_img = pygame.image.load("assets/snake.png").convert_alpha()
+apple_img = pygame.image.load("assets/apple.png").convert_alpha()
+
+# 🖱️ Click to start screen
+font = pygame.font.SysFont(None, 48)
+screen.blit(bg_img, (0, 0))
+text = font.render("Click anywhere to start", True, (255, 255, 255))
+rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+screen.blit(text, rect)
+pygame.display.flip()
+
+waiting = True
+while waiting:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            waiting = False
+
+# Game state
 snake = [(100, 100)]
 direction = (CELL_SIZE, 0)
 food = (300, 200)
 score = 0
 
 def draw():
-    screen.fill((0, 0, 0))
+    screen.blit(bg_img, (0, 0))
     for segment in snake:
-        pygame.draw.rect(screen, (0, 255, 0), (*segment, CELL_SIZE, CELL_SIZE))
-    pygame.draw.rect(screen, (255, 0, 0), (*food, CELL_SIZE, CELL_SIZE))
+        screen.blit(snake_img, segment)
+    screen.blit(apple_img, food)
     pygame.display.flip()
 
 def move():
